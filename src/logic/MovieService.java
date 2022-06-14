@@ -106,7 +106,7 @@ public class MovieService extends MovieServiceBase {
 	 */
 	public Document findMovieByTitle(String title) {
 		//TODONE : implement
-		Document result = movies.find(eq("title", title)).first();;
+		Document result = movies.find(eq("title", title)).first();
 		return result;
 	}
 
@@ -162,9 +162,15 @@ public class MovieService extends MovieServiceBase {
 	 * @return the FindIterable for the query
 	 */
 	public FindIterable<Document> searchByPrefix(String titlePrefix, int limit) {
-		//TODO : implement
-		Document prefixQuery = null;
-		FindIterable<Document> result = null;
+		//TODONE : implement
+
+		Document prefixQuery = new Document();
+		prefixQuery.append("$regex", "^" + titlePrefix);
+		prefixQuery.append("$options", "i");
+
+		Document findQuery = new Document();
+		findQuery.append("title", prefixQuery);
+		FindIterable<Document> result = movies.find(findQuery).limit(limit);
 		return result;
 	}
 
@@ -175,8 +181,8 @@ public class MovieService extends MovieServiceBase {
 	 * @return the FindIterable for the query
 	 */
 	public FindIterable getTweetedMovies() {
-		//TODO : implement
-		FindIterable<Document>  result = null;
+		// TODONE implement
+		FindIterable<Document>  result = movies.find(exists("tweets"));
 		return result;
 	}
 
@@ -190,9 +196,9 @@ public class MovieService extends MovieServiceBase {
 	 *            the comment to save
 	 */
 	public void saveMovieComment(String id, String comment) {
-		// TODO implement
-		Document query = null;
-		Document update = null;
+		// TODONE implement
+		Document query = movies.find(eq("_id", id)).first();
+		Document update = new Document ("$set", new Document("comment", comment));
 		movies.updateOne(query, update);
 	}
 
@@ -222,8 +228,8 @@ public class MovieService extends MovieServiceBase {
 	 * @return the FindIterable for the query
 	 */
 	public FindIterable getByTweetsKeywordRegex(String keyword, int limit) {
-		//TODO : implement
-		FindIterable<Document>  result = null;
+		//TODONE : implement
+		FindIterable<Document> result = movies.find(regex("tweets.text", keyword, "i")).limit(limit);
 		return result;
 	}
 
@@ -258,8 +264,8 @@ public class MovieService extends MovieServiceBase {
 	 * @return the FindIterable for the query
 	 */
 	public FindIterable<Document>  getNewestTweets(int limit) {
-		//TODO : implement
-		FindIterable<Document>  result = null;
+		//TODONE : implement
+		FindIterable<Document> result = tweets.find().sort(new BasicDBObject("_id", -1)).limit(limit);
 		return result;
 	}
 
@@ -272,8 +278,8 @@ public class MovieService extends MovieServiceBase {
 	 * @return the FindIterable for the query
 	 */
 	public FindIterable<Document>  getGeotaggedTweets(int limit) {
-		//TODO : implement
-		FindIterable<Document>  result = null;
+		//TODONE : implement
+		FindIterable<Document> result = tweets.find(exists("coordinates")).limit(limit);
 		return result;
 	}
 
@@ -289,9 +295,9 @@ public class MovieService extends MovieServiceBase {
 	 * @param contentType
 	 */
 	public void saveFile(String name, InputStream inputStream, String contentType) {
+		// TODONE IMPLEMENT
 		GridFSUploadOptions options = new GridFSUploadOptions().chunkSizeBytes(358400).metadata(new Document("contentType", contentType));
-		// TODO IMPLEMENT
-	    ObjectId fileId = null; 
+		ObjectId fileId = fs.uploadFromStream(name, inputStream, options); 
 	}
 
 	/**
@@ -303,10 +309,10 @@ public class MovieService extends MovieServiceBase {
 	 * @return The retrieved GridFS File
 	 */
 	public GridFSFile getFile(String name) {
-		// TODO: Implement
-		GridFSFile file = null;
+		// TODONE IMPLEMENT
+		GridFSFile file = fs.find(new Document("filename", name)).first();
 		if (file == null) {
-			file = null;
+			file = fs.find(new Document("filename", "sample.png")).first();
 		}
 		return file;
 	}
